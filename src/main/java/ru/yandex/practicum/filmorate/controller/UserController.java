@@ -14,57 +14,55 @@ import java.util.Map;
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final LocalDate now = LocalDate.now();
+    private static final LocalDate now = LocalDate.now();
     private final Map<Integer, User> users = new HashMap<>();
     private int nexID = 1;
 
     @PostMapping
-    public User addUser(@RequestBody User user) throws ValidationException {
-         if (checkUser(user)) {
-            if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-                log.info("Значению имени пользователя присвоено значение поля логин");
-            }
-            user.setId(nexID);
-            log.info("Присвоен ID фильму");
-            nexID++;
-            log.info("Обновлён nextID" + nexID);
-            users.put(user.getId(), user);
-            log.info("Добавлен пользователь " + user);
+    public User addUser(@RequestBody User user) {
+        checkUser(user);
+        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("Значению имени пользователя присвоено значение поля логин {}", user.getLogin());
         }
+        user.setId(nexID);
+        log.info("Присвоен ID фильму {}", nexID);
+        nexID++;
+        log.info("Обновлён nextID {}", nexID);
+        users.put(user.getId(), user);
+        log.info("Добавлен пользователь {}", user);
         return user;
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) throws ValidationException {
-        if (users.containsKey(user.getId()) && checkUser(user)) {
+    public User updateUser(@RequestBody User user) {
+        if (users.containsKey(user.getId())) {
+            checkUser(user);
             users.put(user.getId(), user);
-            log.info("Обновлены данные пользователя " + user);
+            log.info("Обновлены данные пользователя {}", user);
         } else {
-            log.error("Данный пользователь еще не добавлен");
-            throw new ValidationException();
+            log.error("Данный пользователь {} еще не добавлен", user);
+            throw new ValidationException("Данный пользователь " + user + " еще не добавлен");
         }
         return user;
     }
 
     @GetMapping
     public Collection<User> getUsers() {
-        log.info("Получен запрос getUsers");
+        log.info("Получен запрос getUsers. Возвращается {} записей", users.size());
         return users.values();
     }
 
-    private boolean checkUser(User user) throws ValidationException {
+    private void checkUser(User user) {
         if (user.getEmail() == null || user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
             log.error("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException();
+            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         } else if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             log.error("Логин не может быть пустым и содержать пробелы");
-            throw new ValidationException();
+            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         } else if (user.getBirthday().isAfter(now)) {
             log.error("Дата рождения не может быть в будущем");
-            throw new ValidationException();
-        } else {
-            return true;
+            throw new ValidationException("Дата рождения не может быть в будущем");
         }
     }
 }
