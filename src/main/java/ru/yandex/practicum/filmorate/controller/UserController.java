@@ -14,7 +14,7 @@ import java.util.Map;
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private static final LocalDate now = LocalDate.now();
+    private final LocalDate now = LocalDate.now();
     private final Map<Integer, User> users = new HashMap<>();
     private int nexID = 1;
 
