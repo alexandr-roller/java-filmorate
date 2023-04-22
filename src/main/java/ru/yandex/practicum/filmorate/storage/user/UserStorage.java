@@ -10,4 +10,6 @@ public interface UserStorage {
     User updateUser(User user);
 
     Collection<User> getUsers();
+
+    User getUser(Long userID);
 }

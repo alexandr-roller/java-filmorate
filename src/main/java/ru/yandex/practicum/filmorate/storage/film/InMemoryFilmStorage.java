@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -20,6 +22,10 @@ public class InMemoryFilmStorage implements FilmStorage {
     private int nexID = 1;
 
     public Film addFilm(Film film) {
+        if (films.containsValue(film)) {
+            log.error("Фильм {} ранее был добавлен", film);
+            throw new FilmAlreadyExistException(String.format("Фильм %s ранее был добавлен", film));
+        }
         checkFilm(film);
         film.setId(nexID);
         log.info("Присвоен ID фильму {}", nexID);
@@ -37,7 +43,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Обновлены данные фильма {}", film);
         } else {
             log.error("Фильм {} не может быть обновлён, т.к. не найден. Сначала добавьте фильм", film);
-            throw new ValidationException("Фильм " + film + " не может быть обновлён, т.к. не найден. Сначала добавьте фильм");
+            throw new FilmNotFoundException("Фильм " + film + " не может быть обновлён, т.к. не найден. Сначала добавьте фильм");
         }
         return film;
     }
@@ -47,8 +53,18 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new ArrayList<>(films.values());
     }
 
+    public Film getFilm(int filmId) {
+        if (films.containsKey(filmId)) {
+            log.info("Получен запрос getFilm({}), Вернулся {}", filmId, films.get(filmId));
+            return films.get(filmId);
+        } else {
+            log.error("Фильм c id {} не найден", filmId);
+            throw new FilmNotFoundException(String.format("Фильм с id %s не найден", filmId));
+        }
+    }
+
     private void checkFilm(Film film) {
-        if (film.getName() == null || film.getName().isEmpty()) {
+        if (film.getName().isEmpty()) {
             log.error("Отсутствует название фильма");
             throw new ValidationException("Отсутствует название фильма");
         } else if (film.getDescription().length() > descriptionLength) {
