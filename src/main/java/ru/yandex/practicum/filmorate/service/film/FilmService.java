@@ -25,27 +25,13 @@ public class FilmService {
     }
 
     public void addLike(int filmId, Long userId) {
-        if (filmStorage.getFilms().stream().map(Film::getId)
-                .collect(Collectors.toList()).contains(filmId)
-                && userStorage.getUsers().stream().map(User::getId)
-                .collect(Collectors.toList()).contains(userId)) {
-            filmStorage.getFilm(filmId).getLikes().add(userId);
-        } else {
-            log.error("Ошибка с полем filmId или userId");
-            throw new IncorrectParameterException("filmId или userId");
-        }
+        userStorage.getUser(userId);
+        filmStorage.getFilm(filmId).getLikes().add(userId);
     }
 
     public void removeLike(int filmId, Long userId) {
-        if (filmStorage.getFilms().stream().map(Film::getId)
-                .collect(Collectors.toList()).contains(filmId)
-                && userStorage.getUsers().stream().map(User::getId)
-                .collect(Collectors.toList()).contains(userId)) {
-            filmStorage.getFilm(filmId).getLikes().remove(userId);
-        } else {
-            log.error("Ошибка с полем filmId или userId");
-            throw new IncorrectParameterException("filmId или userId");
-        }
+        userStorage.getUser(userId);
+        filmStorage.getFilm(filmId).getLikes().remove(userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {

@@ -21,29 +21,19 @@ public class UserService {
     }
 
     public User addFriend(Long userId, Long friendId) {
-        if (new HashSet<>(userStorage.getUsers().stream().map(User::getId)
-                .collect(Collectors.toList())).containsAll(List.of(userId, friendId))) {
-            userStorage.getUser(userId).getFriends().add(friendId);
-            userStorage.getUser(friendId).getFriends().add(userId);
-            log.info("Получен запрос addFriend(userId-{}, friendId-{})", userId, friendId);
-            return userStorage.getUser(friendId);
-        } else {
-            log.error("Ошибка с полем userId или friendId");
-            throw new IncorrectParameterException("userId или friendId");
-        }
+        userStorage.getUser(friendId);
+        userStorage.getUser(userId).getFriends().add(friendId);
+        userStorage.getUser(friendId).getFriends().add(userId);
+        log.info("Получен запрос addFriend(userId {}, friendId {})", userId, friendId);
+        return userStorage.getUser(friendId);
     }
 
     public User removeFriend(Long userId, Long friendId) {
-        if (new HashSet<>(userStorage.getUsers().stream().map(User::getId)
-                .collect(Collectors.toList())).containsAll(List.of(userId, friendId))) {
-            userStorage.getUser(userId).getFriends().remove(friendId);
-            userStorage.getUser(friendId).getFriends().remove(userId);
-            log.info("Получен запрос removeFriend(userId-{}, friendId-{}", userId, friendId);
-            return userStorage.getUser(friendId);
-        } else {
-            log.error("Ошибка с полем userId или friendId");
-            throw new IncorrectParameterException("userId или friendId");
-        }
+        userStorage.getUser(friendId);
+        userStorage.getUser(userId).getFriends().remove(friendId);
+        userStorage.getUser(friendId).getFriends().remove(userId);
+        log.info("Получен запрос removeFriend(userId {}, friendId {}", userId, friendId);
+        return userStorage.getUser(friendId);
     }
 
     public Collection<User> getFriends(Long userId) {
@@ -52,10 +42,10 @@ public class UserService {
                 .map(userStorage::getUser).collect(Collectors.toList());
     }
 
-    public List<User> getCommonFriends(Long userId, Long userId2) {
-        log.info("Получен запрос getCommonFriends(userId-{}, userID2-{}), возвращён список", userId, userId2);
+    public List<User> getCommonFriends(Long userId, Long otherId) {
+        log.info("Получен запрос getCommonFriends(userId {}, userID2 {}), возвращён список", userId, otherId);
         return userStorage.getUser(userId).getFriends().stream()
-                .filter(userStorage.getUser(userId2).getFriends()::contains)
+                .filter(userStorage.getUser(otherId).getFriends()::contains)
                 .map(userStorage::getUser)
                 .collect(Collectors.toList());
     }
