@@ -1,3 +1,4 @@
+HELP.md
 *.class
 *.log
 *.jar
@@ -7,6 +8,8 @@
 *.zip
 *.tar.gz
 *.rar
+*.db
+db/*
 hs_err_pid*
 out/
 target/
@@ -41,6 +44,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-*.db
-db/*
