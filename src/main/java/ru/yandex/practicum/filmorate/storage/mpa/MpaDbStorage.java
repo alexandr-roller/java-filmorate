@@ -14,7 +14,7 @@ import java.util.Collection;
 @Slf4j
 @Component("MpaDbStorage")
 public class MpaDbStorage implements MpaStorage {
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public MpaDbStorage(JdbcTemplate jdbcTemplate) {
@@ -43,7 +43,7 @@ public class MpaDbStorage implements MpaStorage {
     private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
         return Mpa.builder()
                 .id(resultSet.getInt("MPA_ID"))
-                .name(resultSet.getString("NAME"))
+                .name(resultSet.getString("MPA_NAME"))
                 .build();
     }
 }

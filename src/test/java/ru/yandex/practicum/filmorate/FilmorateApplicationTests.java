@@ -6,27 +6,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmServiceDao;
+import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
+import ru.yandex.practicum.filmorate.service.user.InMemoryUserService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.service.user.UserServiceDao;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmorateApplicationTests {
 
-    UserStorage userStorage = new InMemoryUserStorage();
-    UserService userService = new UserService(userStorage);
-    FilmStorage filmStorage = new InMemoryFilmStorage();
-    FilmService filmService = new FilmService(filmStorage, userStorage);
+    private final UserDbStorage userStorage;
+    private final UserServiceDao userService;
+    private final FilmDbStorage filmStorage;
+    private final FilmServiceDao filmService;
+
     User user1 = User.builder()
             .login("login1")
             .birthday(LocalDate.of(2000, 1, 1))
@@ -37,11 +48,19 @@ class FilmorateApplicationTests {
             .birthday(LocalDate.of(2000, 2, 2))
             .email("mail2@mail.ru")
             .build();
+//    Genre genre1 = new Genre.GenreBuilder()
+//            .id(1)
+//            .name("Комедия")
+//            .build();
+//    Genre genre2 = new Genre(2, "Драма");
+
     Film film1 = Film.builder()
             .name("name1")
             .description("description")
             .duration(100)
             .releaseDate(LocalDate.of(2020, 8, 8))
+//            .mpa(new Mpa(1, "G"))
+//            .genres(Set.of(genre1, genre2)))
             .build();
     Film film2 = Film.builder()
             .name("name2")

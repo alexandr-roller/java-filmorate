@@ -9,7 +9,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,9 +25,9 @@ public class Film {
     private int duration;
     private Mpa mpa;
     private Integer rate;
-    private Set<Genre> genres = new HashSet<>();
+    private Set<Genre> genres;
     @JsonIgnore
-    private final Set<Long> likes = new HashSet<>();
+    private Set<Long> likes;
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
@@ -37,7 +36,8 @@ public class Film {
         values.put("DESCRIPTION", description);
         values.put("RELEASE_DATE", releaseDate);
         values.put("DURATION", duration);
-        values.put("RATING_MPA", rate);
+        values.put("MPA_ID", mpa.getId());
+        values.put("RATE", rate);
         return values;
     }
 }

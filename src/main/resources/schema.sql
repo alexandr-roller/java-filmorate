@@ -1,11 +1,18 @@
 drop table IF EXISTS FILM_GENRES;
 drop table IF EXISTS FILM_LIKES;
-drop table IF EXISTS FILM_MPA;
 drop table IF EXISTS FILMS;
 drop table IF EXISTS FRIENDS;
 drop table IF EXISTS GENRES;
 drop table IF EXISTS MPA;
 drop table IF EXISTS USERS;
+
+create table IF NOT EXISTS MPA
+(
+    MPA_ID   INTEGER,
+    MPA_NAME CHARACTER VARYING(50),
+    constraint MPA
+        primary key (MPA_ID)
+);
 
 create table IF NOT EXISTS FILMS
 (
@@ -14,45 +21,30 @@ create table IF NOT EXISTS FILMS
     DESCRIPTION  CHARACTER VARYING(255),
     RELEASE_DATE DATE,
     DURATION     INTEGER,
-    RATING_MPA   INTEGER,
+    MPA_ID       INTEGER,
+    RATE         INTEGER,
     constraint FILMS_PK
-        primary key (FILM_ID)
+        primary key (FILM_ID),
+    constraint "FILMS_MPA_MPA_ID_fk"
+        foreign key (MPA_ID) references MPA
 );
 
 create table IF NOT EXISTS GENRES
 (
-    GENRES_ID INTEGER,
-    NAME      CHARACTER VARYING(50),
+    GENRE_ID   INTEGER,
+    GENRE_NAME CHARACTER VARYING(50),
     constraint GENRES
-        primary key (GENRES_ID)
+        primary key (GENRE_ID)
 );
 
 create table IF NOT EXISTS FILM_GENRES
 (
-    FILM_ID   INTEGER not null,
-    GENRES_ID INTEGER not null,
+    FILM_ID  INTEGER not null,
+    GENRE_ID INTEGER not null,
     constraint "FILM_GENRES_FILMS_FILM_ID_fk"
         foreign key (FILM_ID) references FILMS,
     constraint "FILM_GENRES_GENRES_GENRES_ID_fk"
-        foreign key (GENRES_ID) references GENRES
-);
-
-create table IF NOT EXISTS MPA
-(
-    MPA_ID INTEGER,
-    NAME   CHARACTER VARYING(50),
-    constraint MPA
-        primary key (MPA_ID)
-);
-
-create table IF NOT EXISTS FILM_MPA
-(
-    FILM_ID INTEGER not null,
-    MPA_ID  INTEGER not null,
-    constraint "FILM_MPA_FILMS_FILM_ID_fk"
-        foreign key (FILM_ID) references FILMS,
-    constraint "FILM_MPA_MPA_MPA_ID_fk"
-        foreign key (MPA_ID) references MPA
+        foreign key (GENRE_ID) references GENRES
 );
 
 create table IF NOT EXISTS USERS
