@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -14,22 +15,22 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
 
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("InMemoryUserStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
     public User addFriend(Long userId, Long friendId) {
-        userStorage.getUser(friendId);
+        boolean isFriend = userStorage.getUser(friendId).getFriends().contains(userId);
         userStorage.getUser(userId).getFriends().add(friendId);
-        userStorage.getUser(friendId).getFriends().add(userId);
+//        userStorage.getUser(friendId).getFriends().add(userId);
         log.info("Получен запрос addFriend(userId {}, friendId {})", userId, friendId);
         return userStorage.getUser(friendId);
     }
 
     public User removeFriend(Long userId, Long friendId) {
-        userStorage.getUser(friendId);
-        userStorage.getUser(userId).getFriends().remove(friendId);
-        userStorage.getUser(friendId).getFriends().remove(userId);
+        boolean isFriend = userStorage.getUser(friendId).getFriends().contains(userId);
+            userStorage.getUser(userId).getFriends().remove(friendId);
+//            userStorage.getUser(friendId).getFriends().remove(userId);
         log.info("Получен запрос removeFriend(userId {}, friendId {}", userId, friendId);
         return userStorage.getUser(friendId);
     }

@@ -11,8 +11,9 @@ HELP.md
 *.db
 db/*
 hs_err_pid*
+.mvn
 out/
-target/
+target/z
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

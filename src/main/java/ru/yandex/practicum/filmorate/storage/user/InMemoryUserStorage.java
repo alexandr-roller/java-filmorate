@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final LocalDate now = LocalDate.now();
     private final Map<Long, User> users = new HashMap<>();

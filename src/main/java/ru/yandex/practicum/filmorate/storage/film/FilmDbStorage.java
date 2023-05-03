@@ -1,67 +1,53 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 @Slf4j
-@Component("InMemoryFilmStorage")
-public class InMemoryFilmStorage implements FilmStorage {
+@Component("FilmDbStorage")
+public class FilmDbStorage implements FilmStorage{
     private static final LocalDate filmDay = LocalDate.of(1895, 12, 28);
     private static final int descriptionLength = 200;
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int nexID = 1;
+    private final JdbcTemplate jdbcTemplate;
 
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
     public Film addFilm(Film film) {
-        if (getFilms().stream().map(Film::getName).equals(film.getName())) {
+        if (films.containsValue(film)) {
             log.error("Фильм {} ранее был добавлен", film);
             throw new FilmAlreadyExistException(String.format("Фильм %s ранее был добавлен", film));
         }
         checkFilm(film);
-        film.setId(nexID);
-        log.info("Присвоен ID фильму {}", nexID);
-        nexID++;
-        log.info("Обновлён nextID {}", nexID);
-        films.put(film.getId(), film);
-        log.info("Добавлено фильм {}", film);
-        return film;
-    }
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("FILMS")
+                .usingGeneratedKeyColumns("FILM_ID");
+        return getFilms(simpleJdbcInsert.executeAndReturnKey(film.toMap()).longValue());    }
 
+    @Override
     public Film updateFilm(Film film) {
-        if (films.containsKey(film.getId())) {
-            checkFilm(film);
-            films.put(film.getId(), film);
-            log.info("Обновлены данные фильма {}", film);
-        } else {
-            log.error("Фильм {} не может быть обновлён, т.к. не найден. Сначала добавьте фильм", film);
-            throw new FilmNotFoundException("Фильм " + film + " не может быть обновлён, т.к. не найден. Сначала добавьте фильм");
-        }
-        return film;
+        return null;
     }
 
+    @Override
     public List<Film> getFilms() {
-        log.info("Получен запрос getFilms. Возвращается {} записей", films.size());
-        return new ArrayList<>(films.values());
+        return null;
     }
 
-    public Film getFilm(int filmId) {
-        if (films.containsKey(filmId)) {
-            log.info("Получен запрос getFilm({}), Вернулся {}", filmId, films.get(filmId));
-            return films.get(filmId);
-        } else {
-            log.error("Фильм c id {} не найден", filmId);
-            throw new FilmNotFoundException(String.format("Фильм с id %s не найден", filmId));
-        }
+    @Override
+    public Film getFilm(int filmID) {
+        return null;
     }
 
     private void checkFilm(Film film) {
