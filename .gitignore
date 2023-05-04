@@ -13,7 +13,7 @@ db/*
 hs_err_pid*
 .mvn
 out/
-target/z
+target
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
