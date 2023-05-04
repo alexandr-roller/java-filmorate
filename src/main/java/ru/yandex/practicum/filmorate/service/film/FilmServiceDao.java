@@ -23,7 +23,6 @@ public class FilmServiceDao implements FilmService {
     private final UserStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
 
-
     public FilmServiceDao(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                           @Qualifier("UserDbStorage") UserStorage userStorage, JdbcTemplate jdbcTemplate) {
         this.filmStorage = filmStorage;

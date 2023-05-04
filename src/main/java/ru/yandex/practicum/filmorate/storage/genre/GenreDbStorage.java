@@ -12,7 +12,7 @@ import java.util.Collection;
 
 @Slf4j
 @Component("GenreDbStorage")
-public class GenreDbStorage implements GenreStorage{
+public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     public GenreDbStorage(JdbcTemplate jdbcTemplate) {

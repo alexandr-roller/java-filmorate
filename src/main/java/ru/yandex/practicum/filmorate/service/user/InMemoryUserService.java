@@ -30,7 +30,7 @@ public class InMemoryUserService implements UserService {
     @Override
     public void removeFriend(Long userId, Long friendId) {
         boolean isFriend = userStorage.getUser(friendId).getFriends().contains(userId);
-            userStorage.getUser(userId).getFriends().remove(friendId);
+        userStorage.getUser(userId).getFriends().remove(friendId);
 //            userStorage.getUser(friendId).getFriends().remove(userId);
         log.info("Получен запрос removeFriend(userId {}, friendId {}", userId, friendId);
     }
