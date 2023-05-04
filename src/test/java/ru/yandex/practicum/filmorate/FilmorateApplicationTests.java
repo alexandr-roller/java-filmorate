@@ -6,27 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.film.FilmServiceDao;
-import ru.yandex.practicum.filmorate.service.film.InMemoryFilmService;
-import ru.yandex.practicum.filmorate.service.user.InMemoryUserService;
-import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.service.user.UserServiceDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -48,11 +37,19 @@ class FilmorateApplicationTests {
             .birthday(LocalDate.of(2000, 2, 2))
             .email("mail2@mail.ru")
             .build();
-//    Genre genre1 = new Genre.GenreBuilder()
-//            .id(1)
-//            .name("Комедия")
-//            .build();
-//    Genre genre2 = new Genre(2, "Драма");
+
+//    List<Genre> genres = List.of(new Genre(1, "Комедия"),
+//            new Genre(2, "Драма"),
+//            new Genre(3, "Мультфильм"),
+//            new Genre(4, "Триллер"),
+//            new Genre(5, "Документальный"),
+//            new Genre(5, "Боевик"));
+//
+//    List<Mpa> mpa = List.of(new Mpa(1, "G"),
+//            new Mpa(2, "PG"),
+//            new Mpa(3, "PG-13"),
+//            new Mpa(4, "R"),
+//            new Mpa(5, "NC-17"));
 
     Film film1 = Film.builder()
             .name("name1")
