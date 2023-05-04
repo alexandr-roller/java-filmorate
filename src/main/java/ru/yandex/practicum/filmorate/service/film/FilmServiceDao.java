@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Slf4j
 @Component("FilmServiceDao")
-public class FilmServiceDao implements FilmService{
+public class FilmServiceDao implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
