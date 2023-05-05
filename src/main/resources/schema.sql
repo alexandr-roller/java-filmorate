@@ -22,7 +22,6 @@ create table IF NOT EXISTS FILMS
     RELEASE_DATE DATE,
     DURATION     INTEGER,
     MPA_ID       INTEGER,
-    RATE         INTEGER,
     constraint FILMS_PK
         primary key (FILM_ID),
     constraint "FILMS_MPA_MPA_ID_fk"
