@@ -24,7 +24,7 @@ public class Film {
     @Positive
     private int duration;
     private Mpa mpa;
-    private Integer rate;
+//    private Integer rate;
     private Set<Genre> genres;
     @JsonIgnore
     private Set<Long> likes;
@@ -37,7 +37,7 @@ public class Film {
         values.put("RELEASE_DATE", releaseDate);
         values.put("DURATION", duration);
         values.put("MPA_ID", mpa.getId());
-        values.put("RATE", rate);
+//        values.put("RATE", rate);
         return values;
     }
 }

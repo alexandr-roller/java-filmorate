@@ -35,8 +35,15 @@ public class FilmServiceDao implements FilmService {
         log.info("Получен запрос addLike({}, {})", filmId, userId);
         filmStorage.getFilm(filmId);
         userStorage.getUser(userId);
-        String sql = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID) VALUES (?, ?)";
-        jdbcTemplate.update(sql, filmId, userId);
+        String sql = "SELECT F.*, M.MPA_NAME from FILMS as F " +
+                "INNER JOIN MPA M on M.MPA_ID = F.MPA_ID " +
+                "WHERE FILM_ID IN " +
+                "(SELECT FILM_ID FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?)";
+        if (jdbcTemplate.query(sql, this::mapRowtoFilm, filmId, userId).isEmpty()) {
+            sql = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID) VALUES (?, ?)";
+            jdbcTemplate.update(sql, filmId, userId);
+            log.info("Был добавлен лайк фильму id{} от пользователя id{}", filmId, userId);
+        }
     }
 
     @Override
@@ -44,21 +51,26 @@ public class FilmServiceDao implements FilmService {
         log.info("Получен запрос removeLike({}, {})", filmId, userId);
         filmStorage.getFilm(filmId);
         userStorage.getUser(userId);
-        String sql = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
-        jdbcTemplate.update(sql, filmId, userId);
+        String sql = "SELECT F.*, M.MPA_NAME from FILMS as F " +
+                "INNER JOIN MPA M on M.MPA_ID = F.MPA_ID " +
+                "WHERE FILM_ID IN " +
+                "(SELECT FILM_ID FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?)";
+        if (!jdbcTemplate.query(sql, this::mapRowtoFilm, filmId, userId).isEmpty()) {
+            sql = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
+            jdbcTemplate.update(sql, filmId, userId);
+            log.info("Был удасён лайк фильма id{} от пользователя id{}", filmId, userId);
+        }
     }
 
     @Override
     public Collection<Film> getPopularFilms(Integer count) {
         log.info("Получен запрос getPopularFilms({})", count);
-        if (count == null || count <= 0) {
-            count = 10;
-        }
-        String sql = "SELECT * FROM FILMS WHERE FILM_ID IN ( " +
-                "SELECT FILM_ID FROM FILM_LIKES " +
-                "GROUP BY FILM_ID " +
-                "ORDER BY COUNT(USER_ID) DESC " +
-                "LIMIT ?)";
+        String sql = "SELECT F.*, M.MPA_NAME from FILMS as F " +
+                "INNER JOIN MPA M on M.MPA_ID = F.MPA_ID " +
+                "LEFT OUTER JOIN (SELECT FILM_ID, COUNT(USER_ID) AS CNT " +
+                "FROM FILM_LIKES GROUP BY FILM_ID) AS LK ON " +
+                "F.FILM_ID = LK.FILM_ID " +
+                "ORDER BY LK.CNT DESC LIMIT ?";
         return jdbcTemplate.query(sql, this::mapRowtoFilm, count);
     }
 
@@ -69,9 +81,11 @@ public class FilmServiceDao implements FilmService {
                 .description(resultSet.getString("DESCRIPTION"))
                 .releaseDate(resultSet.getDate("RELEASE_DATE").toLocalDate())
                 .duration(resultSet.getInt("DURATION"))
-                .mpa(makeMpa(resultSet.getInt("MPA_ID")))
+                .mpa(Mpa.builder()
+                        .id(resultSet.getInt("MPA_ID"))
+                        .name(resultSet.getString("MPA_NAME"))
+                        .build())
                 .genres(makeGenres(resultSet.getInt("FILM_ID")))
-                .rate(resultSet.getInt("RATE"))
                 .build();
     }
 
@@ -81,7 +95,8 @@ public class FilmServiceDao implements FilmService {
     }
 
     private Set<Genre> makeGenres(int filmId) {
-        String sql = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
+        String sql = "SELECT * FROM GENRES WHERE GENRE_ID IN " +
+                "(SELECT GENRE_ID FROM FILM_GENRES WHERE FILM_ID = ?)";
         return new HashSet<>(jdbcTemplate.query(sql, this::mapRowGenre, filmId));
     }
 
