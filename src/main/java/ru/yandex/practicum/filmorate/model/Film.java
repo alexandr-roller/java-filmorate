@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -24,10 +23,7 @@ public class Film {
     @Positive
     private int duration;
     private Mpa mpa;
-//    private Integer rate;
     private Set<Genre> genres;
-    @JsonIgnore
-    private Set<Long> likes;
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
@@ -37,7 +33,6 @@ public class Film {
         values.put("RELEASE_DATE", releaseDate);
         values.put("DURATION", duration);
         values.put("MPA_ID", mpa.getId());
-//        values.put("RATE", rate);
         return values;
     }
 }
