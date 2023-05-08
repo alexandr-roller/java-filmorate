@@ -1,50 +1,68 @@
 package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
 @Slf4j
+@Component("UserServiceDao")
 public class UserService {
     private final UserStorage userStorage;
+    private final JdbcTemplate jdbcTemplate;
 
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage, JdbcTemplate jdbcTemplate) {
         this.userStorage = userStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    public User addFriend(Long userId, Long friendId) {
+    public void addFriend(Long userId, Long friendId) {
+        log.info("Получен запрос addFriend({}, {})", userId, friendId);
+        userStorage.getUser(userId);
         userStorage.getUser(friendId);
-        userStorage.getUser(userId).getFriends().add(friendId);
-        userStorage.getUser(friendId).getFriends().add(userId);
-        log.info("Получен запрос addFriend(userId {}, friendId {})", userId, friendId);
-        return userStorage.getUser(friendId);
+        String sql = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID)" +
+                "VALUES (?, ?)";
+        jdbcTemplate.update(sql, userId, friendId);
     }
 
-    public User removeFriend(Long userId, Long friendId) {
+    public void removeFriend(Long userId, Long friendId) {
+        log.info("Получен запрос removeFriend({}, {})", userId, friendId);
+        userStorage.getUser(userId);
         userStorage.getUser(friendId);
-        userStorage.getUser(userId).getFriends().remove(friendId);
-        userStorage.getUser(friendId).getFriends().remove(userId);
-        log.info("Получен запрос removeFriend(userId {}, friendId {}", userId, friendId);
-        return userStorage.getUser(friendId);
+        String sql = "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?";
+        jdbcTemplate.update(sql, userId, friendId);
     }
 
     public Collection<User> getFriends(Long userId) {
         log.info("Получен запрос getFriends({})", userId);
-        return userStorage.getUser(userId).getFriends().stream()
-                .map(userStorage::getUser).collect(Collectors.toList());
+        String sql = "SELECT * FROM USERS WHERE USER_ID IN (SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?)";
+        return jdbcTemplate.query(sql, this::mapRowtoUser, userId);
     }
 
-    public List<User> getCommonFriends(Long userId, Long otherId) {
-        log.info("Получен запрос getCommonFriends(userId {}, userID2 {}), возвращён список", userId, otherId);
-        return userStorage.getUser(userId).getFriends().stream()
-                .filter(userStorage.getUser(otherId).getFriends()::contains)
-                .map(userStorage::getUser)
-                .collect(Collectors.toList());
+    public Collection<User> getCommonFriends(Long userId, Long otherUserId) {
+        log.info("Получен запрос getCommonFriends({}, {})", userId, otherUserId);
+        String sql = "SELECT * FROM USERS " +
+                "JOIN FRIENDS ON USERS.USER_ID = FRIENDS.FRIEND_ID " +
+                "WHERE FRIENDS.USER_ID = ?" +
+                "AND FRIEND_ID IN " +
+                "(SELECT FRIEND_ID FROM FRIENDS " +
+                "WHERE FRIENDS.USER_ID = ?)";
+        return jdbcTemplate.query(sql, this::mapRowtoUser, userId, otherUserId);
+    }
+
+    private User mapRowtoUser(ResultSet resultSet, int rowNum) throws SQLException {
+        return User.builder()
+                .id(resultSet.getLong("USER_ID"))
+                .email(resultSet.getString("EMAIL"))
+                .login(resultSet.getString("LOGIN"))
+                .name(resultSet.getString("USER_NAME"))
+                .birthday(resultSet.getDate("BIRTHDAY").toLocalDate())
+                .build();
     }
 }

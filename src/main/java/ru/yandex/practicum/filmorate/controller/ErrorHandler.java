@@ -53,10 +53,24 @@ public class ErrorHandler {
         return new ErrorResponse(String.format("Ошибка с полем \"%s\".", e.getParameter()));
     }
 
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public ErrorResponse handleThrowable(final Throwable e) {
+//        log.info("got error {}", e.getMessage());
+//        return new ErrorResponse("Произошла непредвиденная ошибка.");
+//    }
+
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleGenreNotFoundException(final GenreNotFoundException e) {
         log.info("got error {}", e.getMessage());
-        return new ErrorResponse("Произошла непредвиденная ошибка.");
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMpaNotFoundException(final MpaNotFoundException e) {
+        log.info("got error {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 }

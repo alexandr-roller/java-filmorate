@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
@@ -15,7 +16,8 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
+    public UserController(@Qualifier("UserDbStorage") UserStorage userStorage,
+                          @Qualifier("UserServiceDao") UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }
@@ -41,13 +43,13 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable("id") Long userId, @PathVariable("friendId") Long friendId) {
-        return userService.addFriend(userId, friendId);
+    public void addFriend(@PathVariable("id") Long userId, @PathVariable("friendId") Long friendId) {
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User removeFriend(@PathVariable("id") Long userId, @PathVariable("friendId") Long friendId) {
-        return userService.removeFriend(userId, friendId);
+    public void removeFriend(@PathVariable("id") Long userId, @PathVariable("friendId") Long friendId) {
+        userService.removeFriend(userId, friendId);
     }
 
     @GetMapping("/{id}/friends")
