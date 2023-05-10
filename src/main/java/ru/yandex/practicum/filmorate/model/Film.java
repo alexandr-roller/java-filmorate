@@ -20,6 +20,7 @@ public class Film {
     private String name;
     private String description;
     private LocalDate releaseDate;
+    private Director director;
     @Positive
     private int duration;
     private Mpa mpa;
@@ -31,6 +32,7 @@ public class Film {
         values.put("FILM_NAME", name);
         values.put("DESCRIPTION", description);
         values.put("RELEASE_DATE", releaseDate);
+        values.put("DIRECTOR_ID", director.getId());
         values.put("DURATION", duration);
         values.put("MPA_ID", mpa.getId());
         return values;

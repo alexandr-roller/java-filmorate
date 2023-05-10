@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -14,12 +16,15 @@ import java.util.Collection;
 public class UserController {
     private final UserStorage userStorage;
     private final UserService userService;
+    private final FilmService filmService;
 
     @Autowired
     public UserController(@Qualifier("UserDbStorage") UserStorage userStorage,
-                          @Qualifier("UserServiceDao") UserService userService) {
+                          @Qualifier("UserServiceDao") UserService userService,
+                          @Qualifier("FilmServiceDao") FilmService filmService) {
         this.userStorage = userStorage;
         this.userService = userService;
+        this.filmService = filmService;
     }
 
     @PostMapping
@@ -30,6 +35,11 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody User user) {
         return userStorage.updateUser(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeUser(@PathVariable("id") Long userId) {
+        userStorage.removeUser(userId);
     }
 
     @GetMapping
@@ -60,5 +70,10 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable("id") Long userId, @PathVariable("otherId") Long otherId) {
         return userService.getCommonFriends(userId, otherId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public Collection<Film> getRecommendation(@PathVariable("userId") Long userId) {
+        return filmService.getRecommendation(userId);
     }
 }

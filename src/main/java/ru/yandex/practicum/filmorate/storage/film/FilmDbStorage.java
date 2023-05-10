@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -17,8 +17,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -34,10 +32,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         log.info("Получен запрос addFilm({})", film);
-        if (getFilms().stream().map(Film::getName).collect(Collectors.toSet()).contains(film.getName())) {
-            log.error("Фильм {} ранее был добавлен", film.getName());
-            throw new FilmAlreadyExistException(String.format("Фильм %s ранее был добавлен", film.getName()));
-        }
+//        if (getFilms().stream().map(Film::getName).collect(Collectors.toSet()).contains(film.getName())) {
+//            log.error("Фильм {} ранее был добавлен", film.getName());
+//            throw new FilmAlreadyExistException(String.format("Фильм %s ранее был добавлен", film.getName()));
+//        }
         checkFilm(film);
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("FILMS")
@@ -84,19 +82,29 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void removeFilm(Integer filmId) {
+        log.info("Получен запрос removeFilm({})", filmId);
+        String sql = "DELETE FROM FILMS WHERE FILM_ID = ?";
+        jdbcTemplate.update(sql, filmId);
+        log.info("Фильм {} был удалён", filmId);
+    }
+
+    @Override
     public Collection<Film> getFilms() {
         log.info("Получен запрос getFilms");
-        String sql = "SELECT F.*, M.MPA_NAME FROM FILMS AS F " +
-                "INNER JOIN MPA M on M.MPA_ID = F.MPA_ID";
+        String sql = "SELECT F.*, M.MPA_NAME, D.DIRECTOR_NAME FROM FILMS AS F " +
+                "INNER JOIN MPA M on M.MPA_ID = F.MPA_ID " +
+                "INNER JOIN DIRECTORS D ON D.DIRECTOR_ID = F.DIRECTOR_ID";
         return jdbcTemplate.query(sql, this::mapRowtoFilm);
     }
 
     @Override
-    public Film getFilm(int filmId) {
+    public Film getFilm(Integer filmId) {
         try {
             log.info("Получен запрос getFilm({})", filmId);
-            String sql = "SELECT F.*, m.MPA_NAME FROM FILMS AS F " +
+            String sql = "SELECT F.*, M.MPA_NAME, D.DIRECTOR_NAME FROM FILMS AS F " +
                     "INNER JOIN MPA M on M.MPA_ID = F.MPA_ID " +
+                    "INNER JOIN DIRECTORS D ON D.DIRECTOR_ID = F.DIRECTOR_ID " +
                     "WHERE F.FILM_ID = ? ";
             return jdbcTemplate.queryForObject(sql, this::mapRowtoFilm, filmId);
         } catch (Exception e) {
@@ -111,6 +119,10 @@ public class FilmDbStorage implements FilmStorage {
                 .name(resultSet.getString("FILM_NAME"))
                 .description(resultSet.getString("DESCRIPTION"))
                 .releaseDate(resultSet.getDate("RELEASE_DATE").toLocalDate())
+                .director(Director.builder()
+                        .id(resultSet.getInt("DIRECTOR_ID"))
+                        .name(resultSet.getString("DIRECTOR_NAME"))
+                        .build())
                 .duration(resultSet.getInt("DURATION"))
                 .mpa(Mpa.builder()
                         .id(resultSet.getInt("MPA_ID"))
@@ -120,22 +132,10 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Mpa makeMpa(int mpaId) {
-        String sql = "SELECT * FROM MPA WHERE MPA_ID = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowtoMpa, mpaId);
-    }
-
     private Set<Genre> makeGenres(int filmId) {
         String sql = "SELECT * FROM GENRES WHERE GENRE_ID IN " +
                 "(SELECT GENRE_ID FROM FILM_GENRES WHERE FILM_ID = ?)";
         return new HashSet<>(jdbcTemplate.query(sql, this::mapRowGenre, filmId));
-    }
-
-    private Mpa mapRowtoMpa(ResultSet resultSet, int rowNum) throws SQLException {
-        return Mpa.builder()
-                .id(resultSet.getInt("MPA_ID"))
-                .name(resultSet.getString("MPA_NAME"))
-                .build();
     }
 
     private Genre mapRowGenre(ResultSet resultSet, int rowNum) throws SQLException {

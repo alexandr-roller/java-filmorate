@@ -41,12 +41,15 @@ public class UserService {
 
     public Collection<User> getFriends(Long userId) {
         log.info("Получен запрос getFriends({})", userId);
+        userStorage.getUser(userId);
         String sql = "SELECT * FROM USERS WHERE USER_ID IN (SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?)";
         return jdbcTemplate.query(sql, this::mapRowtoUser, userId);
     }
 
     public Collection<User> getCommonFriends(Long userId, Long otherUserId) {
         log.info("Получен запрос getCommonFriends({}, {})", userId, otherUserId);
+        userStorage.getUser(userId);
+        userStorage.getUser(otherUserId);
         String sql = "SELECT * FROM USERS " +
                 "JOIN FRIENDS ON USERS.USER_ID = FRIENDS.FRIEND_ID " +
                 "WHERE FRIENDS.USER_ID = ?" +

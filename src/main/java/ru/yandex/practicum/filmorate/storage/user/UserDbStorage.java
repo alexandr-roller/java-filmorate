@@ -57,6 +57,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void removeUser(Long userId) {
+        log.info("Получен запрос removeUser({})", userId);
+        String sql = "DELETE FROM USERS WHERE USER_ID = ?";
+        jdbcTemplate.update(sql, userId);
+        log.info("Пользователь {} был удалён", userId);
+    }
+
+    @Override
     public Collection<User> getUsers() {
         log.info("Получен запрос getUsers");
         String sql = "SELECT * FROM USERS";

@@ -1,10 +1,12 @@
 drop table IF EXISTS FILM_GENRES;
 drop table IF EXISTS FILM_LIKES;
+drop table IF EXISTS REVIEWS;
 drop table IF EXISTS FILMS;
 drop table IF EXISTS FRIENDS;
 drop table IF EXISTS GENRES;
 drop table IF EXISTS MPA;
 drop table IF EXISTS USERS;
+drop table IF EXISTS DIRECTORS;
 
 create table IF NOT EXISTS MPA
 (
@@ -14,18 +16,29 @@ create table IF NOT EXISTS MPA
         primary key (MPA_ID)
 );
 
+create table IF NOT EXISTS DIRECTORS
+(
+    DIRECTOR_ID   INTEGER auto_increment,
+    DIRECTOR_NAME CHARACTER VARYING(50) not null,
+    constraint "DIRECTORS_pk"
+        primary key (DIRECTOR_ID)
+);
+
 create table IF NOT EXISTS FILMS
 (
     FILM_ID      INTEGER auto_increment,
     FILM_NAME    CHARACTER VARYING(50),
     DESCRIPTION  CHARACTER VARYING(255),
     RELEASE_DATE DATE,
+    DIRECTOR_ID  INTEGER,
     DURATION     INTEGER,
     MPA_ID       INTEGER,
     constraint FILMS_PK
         primary key (FILM_ID),
     constraint "FILMS_MPA_MPA_ID_fk"
-        foreign key (MPA_ID) references MPA
+        foreign key (MPA_ID) references MPA,
+    constraint "FILMS_DIRECTOR_DIRECTOR_ID_fk"
+        foreign key (DIRECTOR_ID) references DIRECTORS
 );
 
 create table IF NOT EXISTS GENRES
@@ -81,4 +94,19 @@ create table IF NOT EXISTS FRIENDS
         foreign key (USER_ID) references USERS,
     constraint "FRIENDS_USERS_USER_ID_fk2"
         foreign key (FRIEND_ID) references USERS
+);
+
+create table IF NOT EXISTS REVIEWS
+(
+    REVIEW_ID   INTEGER auto_increment,
+    FILM_ID     INTEGER                not null,
+    USER_ID     LONG                   not null,
+    CONTENT     CHARACTER VARYING(255) not null,
+    IS_POSITIVE BOOLEAN                not null,
+    constraint "REVIEWS_pk"
+        primary key (REVIEW_ID),
+    constraint "FILM_COMMENTS_FILMS_FILM_ID_fk"
+        foreign key (FILM_ID) references FILMS,
+    constraint "FILM_COMMENTS_USERS_USER_ID_fk"
+        foreign key (USER_ID) references USERS
 );
