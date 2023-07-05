@@ -1,45 +1,41 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.model.impl.Director;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/directors")
+@RequiredArgsConstructor
 public class DirectorController {
-    private final DirectorStorage directorStorage;
-
-    @Autowired
-    public DirectorController(@Qualifier("DirectorDbStorage") DirectorStorage directorStorage) {
-        this.directorStorage = directorStorage;
-    }
-
-    @PostMapping
-    public Director addDirector(@RequestBody Director director) {
-        return directorStorage.addDirector(director);
-    }
-
-    @PutMapping
-    public Director updateDirector(@RequestBody Director director) {
-        return directorStorage.updateDirector(director);
-    }
-
-    @DeleteMapping("/{id}")
-    public void removeDirector(@PathVariable("id") Integer directorId) {
-        directorStorage.removeDirector(directorId);
-    }
+    private final DirectorService directorService;
 
     @GetMapping
     public Collection<Director> getDirectors() {
-        return directorStorage.getDirectors();
+        return directorService.findAll();
     }
 
     @GetMapping("/{id}")
     public Director getDirector(@PathVariable("id") Integer directorId) {
-        return directorStorage.getDirector(directorId);
+        return directorService.findById(directorId);
+    }
+
+    @PostMapping
+    public Director addDirector(@Valid @RequestBody Director director) {
+        return directorService.create(director);
+    }
+
+    @PutMapping
+    public Director updateDirector(@Valid @RequestBody Director director) {
+        return directorService.update(director);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeDirector(@PathVariable("id") Integer directorId) {
+        directorService.removeDirector(directorId);
     }
 }
