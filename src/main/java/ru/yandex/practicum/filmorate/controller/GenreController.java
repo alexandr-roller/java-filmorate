@@ -1,30 +1,28 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.model.impl.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/genres")
+@RequiredArgsConstructor
 public class GenreController {
-    private final GenreStorage genreStorage;
-
-    public GenreController(GenreStorage genreStorage) {
-        this.genreStorage = genreStorage;
-    }
+    private final GenreService genreService;
 
     @GetMapping
-    public Collection<Genre> getGenres() {
-        return genreStorage.getGenres();
+    public List<Genre> findAll() {
+        return genreService.findAll();
     }
 
-    @GetMapping("{id}")
-    public Genre getGenre(@PathVariable("id") int genreId) {
-        return genreStorage.getGenre(genreId);
+    @GetMapping(value = "/{id}")
+    public Genre findById(@PathVariable int id) {
+        return genreService.findById(id);
     }
 }
